@@ -1,3 +1,6 @@
+![Banner](./banner.png)
+
+
 # 🏦 Sistema Bancário em Python com Interface Gráfica (GUI)
 
 Este projeto é uma implementação de um sistema bancário simples em Python, inicialmente desenvolvido em console e posteriormente reescrito utilizando Programação Orientada a Objetos (POO) e uma Interface Gráfica de Usuário (GUI) construída com a biblioteca Tkinter.
