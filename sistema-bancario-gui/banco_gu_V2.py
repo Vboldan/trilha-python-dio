@@ -234,7 +234,7 @@ class BancoApp(tk.Tk):
 
     def carregar_dados_iniciais(self):
         # Cria um usuário PessoaFisica com a classe correta
-        cliente_teste = PessoaFisica("Maria Silva", "01-01-1990", "12345678900", "Rua A, 1 - Centro - Cidade/SP")
+        cliente_teste = PessoaFisica("Valdeci Boldan", "31-03-1981", "123", "Rua Barueri, 51 - Moreninh 2 - Campo Grande/MS")
         self.clientes.append(cliente_teste)
         
         conta_teste = ContaCorrente(1, cliente_teste)
