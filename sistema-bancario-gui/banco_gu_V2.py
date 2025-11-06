@@ -221,7 +221,7 @@ class BancoApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Sistema Bancário - GUI V3")
-        self.geometry("400x450") 
+        self.geometry("500x450") 
         self.configure(padx=10, pady=10)
         
         self.AGENCIA = "0001"
@@ -333,28 +333,45 @@ class BancoApp(tk.Tk):
             self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
             self.atualizar_status()
 
+   # MÉTODO EXTRATO FINALMENTE CORRIGIDO PARA TELAS ESTREITAS
     def handle_extrato(self):
         if not self.conta_selecionada:
             messagebox.showwarning("Atenção", "Selecione uma conta primeiro.")
-            return
-            
-        # Implementação do Gerador (gerar_relatorio) no Extrato
+            return            
         extrato_list = []
         tem_transacao = False
         
-        # O gerador retorna cada transação uma por vez
+        # Larguras fixas para alinhamento
+        DATA_LARGURA = 50
+        TIPO_LARGURA = 50 
+        
         for transacao in self.conta_selecionada.historico.gerar_relatorio():
             tem_transacao = True
-            # Detalhes da Data e Hora (Nova Característica)
-            extrato_list.append(
-                f"[{transacao['data']}] {transacao['tipo']}:\t\tR$ {transacao['valor']:.2f}"
-            )
+            
+            # Formatação para telas estreitas: Quebra em duas linhas
+
+            # Linha 1: Data e Tipo
+            data_tipo = f"[{transacao['data']}] {transacao['tipo']}:"
+            
+            # Linha 2: Valor, com recuo (4 espaços)
+            valor_formatado = f"R$ {transacao['valor']:.2f}".rjust(12) 
+            linha_valor = "    " + valor_formatado
+
+            # Adiciona as duas linhas separadas
+            extrato_list.append(data_tipo)
+            extrato_list.append(linha_valor)
+            extrato_list.append("-" * 30) # Separador visual para cada transação
+
+        # Remove o último separador para limpeza visual
+        if tem_transacao:
+            extrato_list.pop() 
 
         if not tem_transacao:
             extrato_str = "Não foram realizadas movimentações."
         else:
             extrato_str = "\n".join(extrato_list)
         
+        # O textwrap organiza o bloco geral para a messagebox
         mensagem = textwrap.dedent(f"""\
             ================ EXTRATO ================
             {extrato_str}
