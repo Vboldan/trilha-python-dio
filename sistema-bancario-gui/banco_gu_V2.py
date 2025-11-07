@@ -3,6 +3,52 @@ from tkinter import messagebox, simpledialog
 import textwrap
 from abc import ABC, abstractclassmethod, abstractproperty
 from datetime import datetime
+import functools
+
+# ==============================================================================
+# 0. DECORADOR DE LOG EM ARQUIVO (REQUISITO NOVO)
+# ==============================================================================
+
+def log_transacao(funcao):
+    @functools.wraps(funcao)
+    def wrapper(*args, **kwargs):
+        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        nome_funcao = funcao.__name__
+        
+        # 1. Executa a função original e captura o retorno
+        resultado = funcao(*args, **kwargs)
+        
+        # 2. Prepara os argumentos e o retorno para o log
+        
+        # Exclui 'self' da lista de argumentos
+        args_formatados = [f"{arg}" for i, arg in enumerate(args) if i != 0] 
+        
+        # Tenta formatar a mensagem de retorno se for um tupla (sucesso, mensagem)
+        if isinstance(resultado, tuple):
+             valor_retornado = f"Sucesso: {resultado[0]} | Mensagem: '{resultado[1]}'"
+        else:
+             valor_retornado = f"'{resultado}'"
+
+        # 3. Constrói a linha de log
+        log_entry = textwrap.dedent(f"""\
+            [LOG {data_hora}]
+            Função: {nome_funcao}
+            Args: ({', '.join(args_formatados)})
+            Retorno: {valor_retornado}
+            ---
+        """)
+
+        # 4. Salva no arquivo log.txt (Modo 'a' para append/adicionar)
+        try:
+            with open("log.txt", "a") as file:
+                file.write(log_entry)
+        except Exception as e:
+            # Em caso de erro ao escrever no log (permissão, etc.)
+            print(f"ERRO AO ESCREVER LOG: {e}") 
+
+        return resultado
+    return wrapper
+
 
 # ==============================================================================
 # 1. MODELO DE DADOS AVANÇADO (LÓGICA DE NEGÓCIO - POO, ITERADORES, GERADORES)
@@ -37,15 +83,15 @@ class Cliente:
         self.endereco = endereco
         self.contas = []
 
+    @log_transacao
     def realizar_transacao(self, conta, transacao):
-        transacao.registrar(conta)
+        transacao.registrar(conta) 
 
     def adicionar_conta(self, conta):
         self.contas.append(conta)
         
     @property
     def nome(self):
-        # Propriedade a ser implementada na subclasse
         raise NotImplementedError("A classe filha deve implementar o nome.")
 
 class PessoaFisica(Cliente):
@@ -53,7 +99,7 @@ class PessoaFisica(Cliente):
         super().__init__(endereco)
         self._nome = nome
         self.data_nascimento = data_nascimento
-        self._cpf = cpf  # CORREÇÃO: Atribuindo ao atributo interno (_cpf)
+        self._cpf = cpf
 
     @property
     def cpf(self):
@@ -74,6 +120,7 @@ class Conta:
         self._historico = Historico()
 
     @classmethod
+    @log_transacao
     def nova_conta(cls, cliente, numero):
         return cls(numero, cliente)
 
@@ -97,27 +144,26 @@ class Conta:
     def historico(self):
         return self._historico
 
+    @log_transacao
     def sacar(self, valor):
         saldo = self.saldo
         excedeu_saldo = valor > saldo
 
         if excedeu_saldo:
-            messagebox.showerror("Erro de Saque", "Você não tem saldo suficiente.")
-            return False
-        elif valor > 0:
-            self._saldo -= valor
-            return True
+            return False, "Você não tem saldo suficiente."
+        elif valor <= 0:
+            return False, "O valor informado é inválido."
         else:
-            messagebox.showerror("Erro de Saque", "O valor informado é inválido.")
-            return False
+            self._saldo -= valor
+            return True, f"Saque de R$ {valor:.2f} realizado com sucesso."
 
+    @log_transacao
     def depositar(self, valor):
         if valor > 0:
             self._saldo += valor
-            return True
+            return True, f"Depósito de R$ {valor:.2f} realizado com sucesso."
         else:
-            messagebox.showerror("Erro de Depósito", "O valor informado é inválido.")
-            return False
+            return False, "O valor informado é inválido."
 
 
 class ContaCorrente(Conta):
@@ -126,8 +172,9 @@ class ContaCorrente(Conta):
         self._limite = limite
         self._limite_saques = limite_saques
 
+    # Sobrescreve 'sacar' para incluir a lógica de limite e saques
+    @log_transacao
     def sacar(self, valor):
-        # Conta saques usando a lista de transacoes do histórico
         numero_saques = len(
             [transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__]
         )
@@ -136,13 +183,12 @@ class ContaCorrente(Conta):
         excedeu_saques = numero_saques >= self._limite_saques
 
         if excedeu_limite:
-            messagebox.showerror("Erro de Saque", f"O valor do saque excede o limite de R$ {self._limite:.2f}.")
+            return False, f"O valor do saque excede o limite de R$ {self._limite:.2f}."
         elif excedeu_saques:
-            messagebox.showerror("Erro de Saque", "Número máximo de saques diários excedido.")
+            return False, "Número máximo de saques diários excedido."
         else:
-            return super().sacar(valor)
-
-        return False
+            # Chama o sacar da Conta (pai)
+            return super().sacar(valor) 
 
 # --- Historico (Com Gerador e Data/Hora) ---
 
@@ -155,7 +201,6 @@ class Historico:
         return self._transacoes
 
     def adicionar_transacao(self, transacao):
-        # Registro de Transação com Data e Hora
         self._transacoes.append(
             {
                 "tipo": transacao.__class__.__name__,
@@ -164,7 +209,6 @@ class Historico:
             }
         )
 
-    # --- GERADOR para Extrato ---
     def gerar_relatorio(self, tipo_transacao=None):
         for transacao in self._transacoes:
             if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
@@ -192,7 +236,8 @@ class Saque(Transacao):
         return self._valor
 
     def registrar(self, conta):
-        sucesso_transacao = conta.sacar(self.valor)
+        # A lógica de saque está na conta e será logada lá
+        sucesso_transacao, _ = conta.sacar(self.valor) 
 
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
@@ -207,91 +252,114 @@ class Deposito(Transacao):
         return self._valor
 
     def registrar(self, conta):
-        sucesso_transacao = conta.depositar(self.valor)
+        # A lógica de depósito está na conta e será logada lá
+        sucesso_transacao, _ = conta.depositar(self.valor) 
 
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
 
 
 # ==============================================================================
-# 2. INTERFACE GRÁFICA (TKINTER) - Layout Otimizado para Mobile
+# 2. INTERFACE GRÁFICA (TKINTER)
 # ==============================================================================
 
 class BancoApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Sistema Bancário - GUI V3")
-        self.geometry("500x450") 
-        self.configure(padx=10, pady=10)
+        self.title("Sistema Bancário - GUI Responsiva")
+        self.geometry("400x600") 
+        self.minsize(300, 400) 
         
         self.AGENCIA = "0001"
         self.clientes = []
         self.contas = []
         self.conta_selecionada = None 
         
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        
         self.setup_ui()
         self.carregar_dados_iniciais()
 
     def carregar_dados_iniciais(self):
-        # Cria um usuário PessoaFisica com a classe correta
-        cliente_teste = PessoaFisica("Valdeci Boldan", "31-03-1981", "123", "Rua Barueri, 51 - Moreninh 2 - Campo Grande/MS")
+        cliente_teste = PessoaFisica("Valdeci Boldan", "01-01-1990", "12345678900", "Rua A, 1 - Centro - Cidade/SP")
         self.clientes.append(cliente_teste)
         
-        conta_teste = ContaCorrente(1, cliente_teste)
+        # Usa o método estático decorado
+        conta_teste = ContaCorrente.nova_conta(cliente_teste, 1) 
         self.contas.append(conta_teste)
         cliente_teste.adicionar_conta(conta_teste)
+        
+        transacao_dep1 = Deposito(100.00)
+        cliente_teste.realizar_transacao(conta_teste, transacao_dep1)
+        transacao_dep2 = Deposito(100.00)
+        cliente_teste.realizar_transacao(conta_teste, transacao_dep2)
+        transacao_dep3 = Deposito(50.00)
+        cliente_teste.realizar_transacao(conta_teste, transacao_dep3)
         
         self.conta_selecionada = conta_teste
         self.atualizar_status()
 
+    # SETUP UI COM SCROLLBAR E GRID
     def setup_ui(self):
-        # Frame Principal de Ações
-        frame_acoes = tk.Frame(self)
-        frame_acoes.pack(pady=10, fill='x')
+        canvas = tk.Canvas(self)
+        scrollbar = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
 
-        tk.Label(frame_acoes, text="Ações de Conta:", font=('Arial', 12, 'bold')).pack(pady=5)
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.grid(row=0, column=0, sticky="nsew")
+        scrollbar.grid(row=0, column=1, sticky="ns")
+
+        scrollable_frame.grid_columnconfigure(0, weight=1)
         
-        frame_botoes_conta = tk.Frame(frame_acoes)
-        frame_botoes_conta.pack(fill='x', padx=10) 
+        pad_x = 20
+        
+        tk.Label(scrollable_frame, text="Ações de Conta:", font=('Arial', 16, 'bold'), justify=tk.LEFT).grid(row=0, column=0, pady=(15, 5), sticky="w", padx=pad_x)
+        
+        frame_botoes_conta = tk.Frame(scrollable_frame)
+        frame_botoes_conta.grid(row=1, column=0, sticky="ew", padx=pad_x)
+        frame_botoes_conta.grid_columnconfigure(0, weight=1)
 
-        btn_depositar = tk.Button(frame_botoes_conta, text="Depositar", command=self.handle_depositar)
-        btn_sacar = tk.Button(frame_botoes_conta, text="Sacar", command=self.handle_sacar)
-        btn_extrato = tk.Button(frame_botoes_conta, text="Extrato", command=self.handle_extrato)
+        btn_depositar = tk.Button(frame_botoes_conta, text="Depositar", command=self.handle_depositar, height=2)
+        btn_sacar = tk.Button(frame_botoes_conta, text="Sacar", command=self.handle_sacar, height=2)
+        btn_extrato = tk.Button(frame_botoes_conta, text="Extrato", command=self.handle_extrato, height=2)
         
         btn_depositar.pack(fill='x', pady=2)
         btn_sacar.pack(fill='x', pady=2)
         btn_extrato.pack(fill='x', pady=2)
         
-        # Frame de Gerenciamento (nu, nc, lc)
-        frame_gerencia = tk.Frame(self)
-        frame_gerencia.pack(pady=10, fill='x')
+        tk.Label(scrollable_frame, text="Gerenciamento:", font=('Arial', 16, 'bold'), justify=tk.LEFT).grid(row=2, column=0, pady=(15, 5), sticky="w", padx=pad_x)
         
-        tk.Label(frame_gerencia, text="Gerenciamento:", font=('Arial', 12, 'bold')).pack(pady=5)
-        
-        frame_botoes_gerencia = tk.Frame(frame_gerencia)
-        frame_botoes_gerencia.pack(fill='x', padx=10)
+        frame_botoes_gerencia = tk.Frame(scrollable_frame)
+        frame_botoes_gerencia.grid(row=3, column=0, sticky="ew", padx=pad_x)
+        frame_botoes_gerencia.grid_columnconfigure(0, weight=1)
 
-        btn_novo_usuario = tk.Button(frame_botoes_gerencia, text="Novo Usuário", command=self.handle_criar_usuario)
-        btn_nova_conta = tk.Button(frame_botoes_gerencia, text="Nova Conta", command=self.handle_criar_conta)
-        btn_listar_contas = tk.Button(frame_botoes_gerencia, text="Listar Contas", command=self.handle_listar_contas)
+        btn_novo_usuario = tk.Button(frame_botoes_gerencia, text="Novo Usuário", command=self.handle_criar_usuario, height=2)
+        btn_nova_conta = tk.Button(frame_botoes_gerencia, text="Nova Conta", command=self.handle_criar_conta, height=2)
+        btn_listar_contas = tk.Button(frame_botoes_gerencia, text="Listar Contas", command=self.handle_listar_contas, height=2)
 
         btn_novo_usuario.pack(fill='x', pady=2)
         btn_nova_conta.pack(fill='x', pady=2)
         btn_listar_contas.pack(fill='x', pady=2)
         
-        # Status da Conta Selecionada
-        self.status_label = tk.Label(self, text="", font=('Arial', 14, 'bold'), fg="blue", justify=tk.LEFT)
-        self.status_label.pack(pady=10, fill='x', padx=10)
+        self.status_label = tk.Label(scrollable_frame, text="", font=('Arial', 14, 'bold'), fg="blue", justify=tk.LEFT)
+        self.status_label.grid(row=4, column=0, pady=(15, 5), sticky="ew", padx=pad_x)
         
-        # Botão para selecionar outra conta
-        btn_selecionar = tk.Button(self, text="Mudar Conta Selecionada", command=self.handle_mudar_conta)
-        btn_selecionar.pack(fill='x', padx=10, pady=5)
+        btn_selecionar = tk.Button(scrollable_frame, text="Mudar Conta Selecionada", command=self.handle_mudar_conta, height=2)
+        btn_selecionar.grid(row=5, column=0, sticky="ew", padx=pad_x, pady=(5, 20))
         
         self.update_idletasks()
-        self.geometry(f"{self.winfo_width()}x{self.winfo_height()}")
 
     def atualizar_status(self):
-        """Atualiza o label de status da conta na tela."""
         if self.conta_selecionada:
             conta = self.conta_selecionada
             status_text = f"Conta Selecionada: {conta.numero}\n"
@@ -304,11 +372,10 @@ class BancoApp(tk.Tk):
     # --- Funções de Ajuda ---
 
     def _filtrar_cliente(self, cpf):
-        """Procura um cliente pelo CPF na lista de clientes."""
         clientes_filtrados = [c for c in self.clientes if c.cpf == cpf]
         return clientes_filtrados[0] if clientes_filtrados else None
 
-    # --- Handlers de Ação (d, s, e) ---
+    # --- Handlers de Ação (Lógica GUI) ---
 
     def handle_depositar(self):
         if not self.conta_selecionada:
@@ -317,10 +384,18 @@ class BancoApp(tk.Tk):
 
         valor = simpledialog.askfloat("Depósito", "Informe o valor do depósito:")
         if valor is not None:
-            transacao = Deposito(valor)
-            self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
-            self.atualizar_status()
-            # Mensagem de sucesso é exibida apenas se a transação for bem-sucedida dentro da classe.
+            # Chama a função de lógica (que é decorada com log)
+            sucesso, mensagem = self.conta_selecionada.depositar(valor)
+            
+            if sucesso:
+                transacao = Deposito(valor)
+                # A função realizar_transacao também é decorada
+                self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
+                self.atualizar_status()
+                messagebox.showinfo("Sucesso", mensagem)
+            else:
+                 messagebox.showerror("Erro de Depósito", mensagem)
+
 
     def handle_sacar(self):
         if not self.conta_selecionada:
@@ -329,40 +404,41 @@ class BancoApp(tk.Tk):
             
         valor = simpledialog.askfloat("Saque", "Informe o valor do saque:")
         if valor is not None:
-            transacao = Saque(valor)
-            self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
-            self.atualizar_status()
+            # Chama a função de lógica (que é decorada com log)
+            sucesso, mensagem = self.conta_selecionada.sacar(valor)
+            
+            if sucesso:
+                transacao = Saque(valor)
+                # A função realizar_transacao também é decorada
+                self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
+                self.atualizar_status()
+                messagebox.showinfo("Sucesso", mensagem)
+            else:
+                 messagebox.showerror("Erro de Saque", mensagem)
 
-   # MÉTODO EXTRATO FINALMENTE CORRIGIDO PARA TELAS ESTREITAS
+
+    # MÉTODO EXTRATO CORRIGIDO PARA TELAS ESTREITAS
     def handle_extrato(self):
         if not self.conta_selecionada:
             messagebox.showwarning("Atenção", "Selecione uma conta primeiro.")
-            return            
+            return
+            
         extrato_list = []
         tem_transacao = False
-        
-        # Larguras fixas para alinhamento
-        DATA_LARGURA = 50
-        TIPO_LARGURA = 50 
         
         for transacao in self.conta_selecionada.historico.gerar_relatorio():
             tem_transacao = True
             
-            # Formatação para telas estreitas: Quebra em duas linhas
-
-            # Linha 1: Data e Tipo
+            # Formatação para telas estreitas: Quebra em duas linhas para evitar truncamento
             data_tipo = f"[{transacao['data']}] {transacao['tipo']}:"
             
-            # Linha 2: Valor, com recuo (4 espaços)
             valor_formatado = f"R$ {transacao['valor']:.2f}".rjust(12) 
-            linha_valor = "    " + valor_formatado
-
-            # Adiciona as duas linhas separadas
+            linha_valor = "    " + valor_formatado # Adiciona um recuo
+            
             extrato_list.append(data_tipo)
             extrato_list.append(linha_valor)
-            extrato_list.append("-" * 30) # Separador visual para cada transação
+            extrato_list.append("-" * 30) # Separador visual
 
-        # Remove o último separador para limpeza visual
         if tem_transacao:
             extrato_list.pop() 
 
@@ -371,7 +447,6 @@ class BancoApp(tk.Tk):
         else:
             extrato_str = "\n".join(extrato_list)
         
-        # O textwrap organiza o bloco geral para a messagebox
         mensagem = textwrap.dedent(f"""\
             ================ EXTRATO ================
             {extrato_str}
@@ -382,7 +457,7 @@ class BancoApp(tk.Tk):
         
         messagebox.showinfo("Extrato da Conta (Data/Hora)", mensagem)
 
-    # --- Handlers de Gerenciamento (nu, nc, lc) ---
+    # --- Handlers de Gerenciamento (Lógica GUI) ---
 
     def handle_criar_usuario(self):
         cpf = simpledialog.askstring("Novo Usuário", "Informe o CPF (somente número):")
@@ -411,7 +486,8 @@ class BancoApp(tk.Tk):
 
         if cliente:
             numero_conta = len(self.contas) + 1
-            nova_conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta)
+            # Usa o método estático decorado
+            nova_conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta) 
             
             self.contas.append(nova_conta)
             cliente.adicionar_conta(nova_conta)
@@ -425,7 +501,6 @@ class BancoApp(tk.Tk):
             messagebox.showinfo("Contas", "Nenhuma conta cadastrada.")
             return
 
-        # --- Implementação do Iterador (ContasIterador) ---
         lista_contas = []
         for conta_detalhes in ContasIterador(self.contas):
             lista_contas.append(textwrap.dedent(conta_detalhes))
