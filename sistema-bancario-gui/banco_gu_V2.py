@@ -6,7 +6,7 @@ from datetime import datetime
 import functools
 
 # ==============================================================================
-# 0. DECORADOR DE LOG EM ARQUIVO (REQUISITO NOVO)
+# 0. DECORADOR DE LOG EM ARQUIVO
 # ==============================================================================
 
 def log_transacao(funcao):
@@ -15,21 +15,15 @@ def log_transacao(funcao):
         data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nome_funcao = funcao.__name__
         
-        # 1. Executa a função original e captura o retorno
         resultado = funcao(*args, **kwargs)
         
-        # 2. Prepara os argumentos e o retorno para o log
-        
-        # Exclui 'self' da lista de argumentos
         args_formatados = [f"{arg}" for i, arg in enumerate(args) if i != 0] 
         
-        # Tenta formatar a mensagem de retorno se for um tupla (sucesso, mensagem)
         if isinstance(resultado, tuple):
              valor_retornado = f"Sucesso: {resultado[0]} | Mensagem: '{resultado[1]}'"
         else:
              valor_retornado = f"'{resultado}'"
 
-        # 3. Constrói a linha de log
         log_entry = textwrap.dedent(f"""\
             [LOG {data_hora}]
             Função: {nome_funcao}
@@ -38,12 +32,10 @@ def log_transacao(funcao):
             ---
         """)
 
-        # 4. Salva no arquivo log.txt (Modo 'a' para append/adicionar)
         try:
             with open("log.txt", "a") as file:
                 file.write(log_entry)
         except Exception as e:
-            # Em caso de erro ao escrever no log (permissão, etc.)
             print(f"ERRO AO ESCREVER LOG: {e}") 
 
         return resultado
@@ -51,11 +43,12 @@ def log_transacao(funcao):
 
 
 # ==============================================================================
-# 1. MODELO DE DADOS AVANÇADO (LÓGICA DE NEGÓCIO - POO, ITERADORES, GERADORES)
+# 1. MODELO DE DADOS AVANÇADO (LÓGICA DE NEGÓCIO)
 # ==============================================================================
 
 # --- ITERADOR para a Lista de Contas ---
 class ContasIterador:
+    # ... (código ContasIterador permanece o mesmo)
     def __init__(self, contas):
         self.contas = contas
         self._index = 0
@@ -172,7 +165,6 @@ class ContaCorrente(Conta):
         self._limite = limite
         self._limite_saques = limite_saques
 
-    # Sobrescreve 'sacar' para incluir a lógica de limite e saques
     @log_transacao
     def sacar(self, valor):
         numero_saques = len(
@@ -187,12 +179,12 @@ class ContaCorrente(Conta):
         elif excedeu_saques:
             return False, "Número máximo de saques diários excedido."
         else:
-            # Chama o sacar da Conta (pai)
             return super().sacar(valor) 
 
-# --- Historico (Com Gerador e Data/Hora) ---
+# --- Historico ---
 
 class Historico:
+    # ... (código Historico, Transacao, Saque, Deposito permanecem o mesmo)
     def __init__(self):
         self._transacoes = []
 
@@ -214,8 +206,6 @@ class Historico:
             if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
                 yield transacao
 
-# --- Classes Abstratas para Transacao ---
-
 class Transacao(ABC):
     @property
     @abstractproperty
@@ -236,7 +226,6 @@ class Saque(Transacao):
         return self._valor
 
     def registrar(self, conta):
-        # A lógica de saque está na conta e será logada lá
         sucesso_transacao, _ = conta.sacar(self.valor) 
 
         if sucesso_transacao:
@@ -252,7 +241,6 @@ class Deposito(Transacao):
         return self._valor
 
     def registrar(self, conta):
-        # A lógica de depósito está na conta e será logada lá
         sucesso_transacao, _ = conta.depositar(self.valor) 
 
         if sucesso_transacao:
@@ -260,7 +248,7 @@ class Deposito(Transacao):
 
 
 # ==============================================================================
-# 2. INTERFACE GRÁFICA (TKINTER)
+# 2. INTERFACE GRÁFICA (TKINTER) - MUDANÇA NO EXTRATO
 # ==============================================================================
 
 class BancoApp(tk.Tk):
@@ -281,11 +269,11 @@ class BancoApp(tk.Tk):
         self.setup_ui()
         self.carregar_dados_iniciais()
 
+    # ... (código carregar_dados_iniciais e setup_ui permanecem o mesmo)
     def carregar_dados_iniciais(self):
         cliente_teste = PessoaFisica("Valdeci Boldan", "01-01-1990", "12345678900", "Rua A, 1 - Centro - Cidade/SP")
         self.clientes.append(cliente_teste)
         
-        # Usa o método estático decorado
         conta_teste = ContaCorrente.nova_conta(cliente_teste, 1) 
         self.contas.append(conta_teste)
         cliente_teste.adicionar_conta(conta_teste)
@@ -300,7 +288,6 @@ class BancoApp(tk.Tk):
         self.conta_selecionada = conta_teste
         self.atualizar_status()
 
-    # SETUP UI COM SCROLLBAR E GRID
     def setup_ui(self):
         canvas = tk.Canvas(self)
         scrollbar = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
@@ -358,7 +345,8 @@ class BancoApp(tk.Tk):
         btn_selecionar.grid(row=5, column=0, sticky="ew", padx=pad_x, pady=(5, 20))
         
         self.update_idletasks()
-
+    
+    # ... (código atualizar_status e _filtrar_cliente permanecem o mesmo)
     def atualizar_status(self):
         if self.conta_selecionada:
             conta = self.conta_selecionada
@@ -369,13 +357,12 @@ class BancoApp(tk.Tk):
         else:
             self.status_label.config(text="Nenhuma conta selecionada.")
             
-    # --- Funções de Ajuda ---
-
     def _filtrar_cliente(self, cpf):
         clientes_filtrados = [c for c in self.clientes if c.cpf == cpf]
         return clientes_filtrados[0] if clientes_filtrados else None
 
-    # --- Handlers de Ação (Lógica GUI) ---
+    # --- Handlers de Ação (d, s, nu, nc, lc) permanecem os mesmos ---
+    # ... (handle_depositar, handle_sacar, handle_criar_usuario, etc.)
 
     def handle_depositar(self):
         if not self.conta_selecionada:
@@ -384,12 +371,10 @@ class BancoApp(tk.Tk):
 
         valor = simpledialog.askfloat("Depósito", "Informe o valor do depósito:")
         if valor is not None:
-            # Chama a função de lógica (que é decorada com log)
             sucesso, mensagem = self.conta_selecionada.depositar(valor)
             
             if sucesso:
                 transacao = Deposito(valor)
-                # A função realizar_transacao também é decorada
                 self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
                 self.atualizar_status()
                 messagebox.showinfo("Sucesso", mensagem)
@@ -404,12 +389,10 @@ class BancoApp(tk.Tk):
             
         valor = simpledialog.askfloat("Saque", "Informe o valor do saque:")
         if valor is not None:
-            # Chama a função de lógica (que é decorada com log)
             sucesso, mensagem = self.conta_selecionada.sacar(valor)
             
             if sucesso:
                 transacao = Saque(valor)
-                # A função realizar_transacao também é decorada
                 self.conta_selecionada.cliente.realizar_transacao(self.conta_selecionada, transacao)
                 self.atualizar_status()
                 messagebox.showinfo("Sucesso", mensagem)
@@ -417,7 +400,55 @@ class BancoApp(tk.Tk):
                  messagebox.showerror("Erro de Saque", mensagem)
 
 
-    # MÉTODO EXTRATO CORRIGIDO PARA TELAS ESTREITAS
+    # NOVO MÉTODO PARA CRIAR O POP-UP DE EXTRATO PERSONALIZADO
+    def _mostrar_extrato_personalizado(self, extrato_str, saldo_atual):
+        # 1. Cria a nova janela (Toplevel)
+        extrato_window = tk.Toplevel(self)
+        extrato_window.title("Extrato da Conta (Data/Hora)")
+        extrato_window.transient(self) # Mantém acima da janela principal
+        extrato_window.grab_set() # Bloqueia eventos para outras janelas
+
+        # 2. Frame principal com padding
+        main_frame = tk.Frame(extrato_window, padx=10, pady=10)
+        main_frame.pack(fill="both", expand=True)
+
+        # 3. Widget Text (permite formatação e exibe o extrato)
+        # O width=500 é apenas uma sugestão, a largura final será ajustada pelo resize.
+        text_widget = tk.Text(main_frame, wrap="none", height=15, width=500, font=('Courier', 10), bd=0)
+        text_widget.pack(fill="both", expand=True)
+        
+        # 4. Construção do conteúdo final (usando espaçamento fixo para garantir alinhamento)
+        cabecalho = "================================================\n"
+        cabecalho += "=============== EXTRATO DETALHADO ===============\n"
+        cabecalho += "================================================\n"
+        
+        rodape = "\n"
+        rodape += "================================================\n"
+        rodape += f"Saldo Atual: R$ {saldo_atual:.2f}".rjust(48) + "\n"
+        rodape += "================================================\n"
+
+        conteudo = cabecalho + extrato_str + rodape
+        
+        text_widget.insert("1.0", conteudo)
+        text_widget.config(state="disabled") # Torna o texto somente leitura
+
+        # 5. Adiciona um Scrollbar horizontal se necessário
+        x_scrollbar = tk.Scrollbar(main_frame, orient='horizontal', command=text_widget.xview)
+        text_widget.config(xscrollcommand=x_scrollbar.set)
+        x_scrollbar.pack(side="bottom", fill="x")
+
+        # 6. Botão OK
+        tk.Button(main_frame, text="OK", command=extrato_window.destroy, width=10).pack(pady=5)
+        
+        # 7. Ajusta a largura da janela para o conteúdo (Opcional, mas ajuda no desktop)
+        extrato_window.update_idletasks()
+        # Calcula a largura necessária baseada na linha mais longa (que é o cabeçalho/rodapé)
+        largura_necessaria = text_widget.winfo_reqwidth()
+        altura_necessaria = extrato_window.winfo_reqheight()
+        extrato_window.geometry(f"{largura_necessaria}x{altura_necessaria}")
+
+
+    # MÉTODO EXTRATO REESCRITO PARA USAR O POP-UP PERSONALIZADO
     def handle_extrato(self):
         if not self.conta_selecionada:
             messagebox.showwarning("Atenção", "Selecione uma conta primeiro.")
@@ -426,38 +457,41 @@ class BancoApp(tk.Tk):
         extrato_list = []
         tem_transacao = False
         
+        # Define as larguras fixas em caracteres para um alinhamento perfeito (Courier é monospace)
+        LARGURA_DATA = 20  # [DD-MM-AAAA HH:MM:SS] -> 20 caracteres
+        LARGURA_TIPO = 10  # Deposito: / Saque:
+        LARGURA_VALOR = 12 # R$ 999.999,99
+        
+        # Total de caracteres por linha: 20 + 10 + 12 = 42. Um total de ~50 é seguro para o pop-up.
+
         for transacao in self.conta_selecionada.historico.gerar_relatorio():
             tem_transacao = True
             
-            # Formatação para telas estreitas: Quebra em duas linhas para evitar truncamento
-            data_tipo = f"[{transacao['data']}] {transacao['tipo']}:"
-            
-            valor_formatado = f"R$ {transacao['valor']:.2f}".rjust(12) 
-            linha_valor = "    " + valor_formatado # Adiciona um recuo
-            
-            extrato_list.append(data_tipo)
-            extrato_list.append(linha_valor)
-            extrato_list.append("-" * 30) # Separador visual
+            # Formata a data (LEFT-justified)
+            data_formatada = f"[{transacao['data']}]".ljust(LARGURA_DATA)
+            # Formata o tipo de transação (LEFT-justified)
+            tipo_formatado = f"{transacao['tipo']}:".ljust(LARGURA_TIPO)
+            # Formata o valor (RIGHT-justified)
+            valor_formatado = f"R$ {transacao['valor']:.2f}".rjust(LARGURA_VALOR) 
+
+            # Constrói a linha com espaçamento fixo
+            extrato_list.append(
+                f"{data_formatada} {tipo_formatado} {valor_formatado}"
+            )
+            extrato_list.append("-" * 45) # Separador visual
 
         if tem_transacao:
-            extrato_list.pop() 
+            extrato_list.pop() # Remove o último separador visual
 
         if not tem_transacao:
             extrato_str = "Não foram realizadas movimentações."
         else:
             extrato_str = "\n".join(extrato_list)
         
-        mensagem = textwrap.dedent(f"""\
-            ================ EXTRATO ================
-            {extrato_str}
-            
-            Saldo Atual: R$ {self.conta_selecionada.saldo:.2f}
-            =========================================
-        """)
-        
-        messagebox.showinfo("Extrato da Conta (Data/Hora)", mensagem)
+        # Chama a nova função para exibir o pop-up com o widget Text
+        self._mostrar_extrato_personalizado(extrato_str, self.conta_selecionada.saldo)
 
-    # --- Handlers de Gerenciamento (Lógica GUI) ---
+    # ... (handle_criar_usuario, handle_criar_conta, handle_listar_contas, handle_mudar_conta permanecem o mesmo)
 
     def handle_criar_usuario(self):
         cpf = simpledialog.askstring("Novo Usuário", "Informe o CPF (somente número):")
@@ -486,7 +520,6 @@ class BancoApp(tk.Tk):
 
         if cliente:
             numero_conta = len(self.contas) + 1
-            # Usa o método estático decorado
             nova_conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta) 
             
             self.contas.append(nova_conta)
