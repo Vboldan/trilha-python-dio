@@ -414,7 +414,7 @@ class BancoApp(tk.Tk):
 
         # 3. Widget Text (permite formatação e exibe o extrato)
         # O width=500 é apenas uma sugestão, a largura final será ajustada pelo resize.
-        text_widget = tk.Text(main_frame, wrap="none", height=15, width=500, font=('Courier', 10), bd=0)
+        text_widget = tk.Text(main_frame, wrap="none", height=30, width=60, font=('Courier', 10), bd=2)
         text_widget.pack(fill="both", expand=True)
         
         # 4. Construção do conteúdo final (usando espaçamento fixo para garantir alinhamento)
