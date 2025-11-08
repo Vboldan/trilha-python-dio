@@ -1,5 +1,3 @@
-![Banner](./banner.png)
-
 
 # 🏦 Sistema Bancário em Python com Interface Gráfica (GUI)
 
