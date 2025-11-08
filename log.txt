@@ -2868,3 +2868,63 @@ Função: realizar_transacao
 Args: (<__main__.ContaCorrente object at 0x7958ba022660>, <__main__.Deposito object at 0x7958b9ffbed0>)
 Retorno: 'None'
 ---
+[LOG ('08-11-25 15:57',)]
+Função: nova_conta
+Args: (<__main__.PessoaFisica object at 0x7f8b88a26510>, 1)
+Retorno: '<__main__.ContaCorrente object at 0x7f8b88a26660>'
+---
+[LOG ('08-11-25 15:57',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7f8b88a26660>, <__main__.Deposito object at 0x7f8b88a26900>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 15:57',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7f8b88a26660>, <__main__.Deposito object at 0x7f8b889ffd90>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 15:57',)]
+Função: depositar
+Args: (50.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 50.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7f8b88a26660>, <__main__.Deposito object at 0x7f8b889ffed0>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 15:57',)]
+Função: sacar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Saque de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: sacar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Saque de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: sacar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Saque de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: sacar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Saque de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 15:57',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7f8b88a26660>, <__main__.Saque object at 0x7f8b88a26900>)
+Retorno: 'None'
+---
