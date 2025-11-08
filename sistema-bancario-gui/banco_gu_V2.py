@@ -420,7 +420,11 @@ class BancoApp(tk.Tk):
         # 4. Construção do conteúdo final (usando espaçamento fixo para garantir alinhamento)
         cabecalho = "================================================\n"
         cabecalho += "============== EXTRATO DETALHADO ==============\n"
+<<<<<<< HEAD
         cabecalho += "================================================\n"
+=======
+        cabecalho += "===============================================\n"
+>>>>>>> d6244cb98994691cb19c3a098ff5fa7301a27013
         
         rodape = "\n"
         rodape += "================================================\n"
