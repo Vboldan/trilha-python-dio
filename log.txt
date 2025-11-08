@@ -2678,3 +2678,158 @@ Função: realizar_transacao
 Args: (<__main__.ContaCorrente object at 0x7a89b4cc2660>, <__main__.Deposito object at 0x7a89b4c9bed0>)
 Retorno: 'None'
 ---
+[LOG 2025-11-08 14:11:15]
+Função: nova_conta
+Args: (<__main__.PessoaFisica object at 0x7a2cfc75e510>, 1)
+Retorno: '<__main__.ContaCorrente object at 0x7a2cfc75e660>'
+---
+[LOG 2025-11-08 14:11:15]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:15]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7a2cfc75e660>, <__main__.Deposito object at 0x7a2cfc75e900>)
+Retorno: 'None'
+---
+[LOG 2025-11-08 14:11:15]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:15]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7a2cfc75e660>, <__main__.Deposito object at 0x7a2cfc737d90>)
+Retorno: 'None'
+---
+[LOG 2025-11-08 14:11:15]
+Função: depositar
+Args: (50.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 50.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:15]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7a2cfc75e660>, <__main__.Deposito object at 0x7a2cfc737ed0>)
+Retorno: 'None'
+---
+[LOG 2025-11-08 14:11:29]
+Função: nova_conta
+Args: (<__main__.PessoaFisica object at 0x7643bb0ae510>, 1)
+Retorno: '<__main__.ContaCorrente object at 0x7643bb0ae660>'
+---
+[LOG 2025-11-08 14:11:29]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:29]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7643bb0ae660>, <__main__.Deposito object at 0x7643bb0ae900>)
+Retorno: 'None'
+---
+[LOG 2025-11-08 14:11:29]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:29]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7643bb0ae660>, <__main__.Deposito object at 0x7643bb087d90>)
+Retorno: 'None'
+---
+[LOG 2025-11-08 14:11:29]
+Função: depositar
+Args: (50.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 50.00 realizado com sucesso.'
+---
+[LOG 2025-11-08 14:11:29]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7643bb0ae660>, <__main__.Deposito object at 0x7643bb087ed0>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:39',)]
+Função: nova_conta
+Args: (<__main__.PessoaFisica object at 0x7565b62c2510>, 1)
+Retorno: '<__main__.ContaCorrente object at 0x7565b62c2660>'
+---
+[LOG ('08-11-25 14:39',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:39',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7565b62c2660>, <__main__.Deposito object at 0x7565b62c2900>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:39',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:39',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7565b62c2660>, <__main__.Deposito object at 0x7565b629bd90>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:39',)]
+Função: depositar
+Args: (50.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 50.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:39',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7565b62c2660>, <__main__.Deposito object at 0x7565b629bed0>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:39',)]
+Função: depositar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:39',)]
+Função: depositar
+Args: (10.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 10.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:39',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7565b62c2660>, <__main__.Deposito object at 0x7565b6308640>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:40',)]
+Função: nova_conta
+Args: (<__main__.PessoaFisica object at 0x7cb7e90e2510>, 1)
+Retorno: '<__main__.ContaCorrente object at 0x7cb7e90e2660>'
+---
+[LOG ('08-11-25 14:40',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:40',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7cb7e90e2660>, <__main__.Deposito object at 0x7cb7e90e2900>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:40',)]
+Função: depositar
+Args: (100.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 100.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:40',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7cb7e90e2660>, <__main__.Deposito object at 0x7cb7e90bbd90>)
+Retorno: 'None'
+---
+[LOG ('08-11-25 14:40',)]
+Função: depositar
+Args: (50.0)
+Retorno: Sucesso: True | Mensagem: 'Depósito de R$ 50.00 realizado com sucesso.'
+---
+[LOG ('08-11-25 14:40',)]
+Função: realizar_transacao
+Args: (<__main__.ContaCorrente object at 0x7cb7e90e2660>, <__main__.Deposito object at 0x7cb7e90bbed0>)
+Retorno: 'None'
+---

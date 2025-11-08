@@ -12,7 +12,7 @@ import functools
 def log_transacao(funcao):
     @functools.wraps(funcao)
     def wrapper(*args, **kwargs):
-        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data_hora = datetime.now().strftime("%d-%m-%y %H:%M"), 
         nome_funcao = funcao.__name__
         
         resultado = funcao(*args, **kwargs)
@@ -197,7 +197,7 @@ class Historico:
             {
                 "tipo": transacao.__class__.__name__,
                 "valor": transacao.valor,
-                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S"), 
+                "data": datetime.now().strftime("%d-%m-%y %H:%M"),  
             }
         )
 
@@ -420,11 +420,7 @@ class BancoApp(tk.Tk):
         # 4. Construção do conteúdo final (usando espaçamento fixo para garantir alinhamento)
         cabecalho = "================================================\n"
         cabecalho += "============== EXTRATO DETALHADO ==============\n"
-<<<<<<< HEAD
         cabecalho += "================================================\n"
-=======
-        cabecalho += "===============================================\n"
->>>>>>> d6244cb98994691cb19c3a098ff5fa7301a27013
         
         rodape = "\n"
         rodape += "================================================\n"
