@@ -1,12 +1,12 @@
-import os
 import sys
+import os
 
 print(os)
 print(sys)
 
 a = "python"
 
-b = "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+b = "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 
 frutas = [
     "pera",
@@ -16,11 +16,19 @@ frutas = [
     "melão",
     "morango",
     "abacate",
-    "banana",
+     "banana",
     "carambola",
     "pessego",
     "tamara",
     "melancia",
 ]
 
-carros = ["ferrari", "brasilia", "gol", "up"]
+
+
+
+
+
+
+
+carros = ["ferrari", 
+          "brasilia", "gol", up']

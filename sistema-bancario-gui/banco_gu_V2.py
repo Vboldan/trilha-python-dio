@@ -215,7 +215,7 @@ class Transacao(ABC):
     @abstractclassmethod
     def registrar(self, conta):
         pass
-
+   
 
 class Saque(Transacao):
     def __init__(self, valor):
