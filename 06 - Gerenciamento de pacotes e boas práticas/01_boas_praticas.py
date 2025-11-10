@@ -1,13 +1,17 @@
-import sys
 import os
+import sys
 
 print(os)
 print(sys)
 
 a = "python"
 
-b = "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
-
+b = (
+    "ssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+    "sssssssssssssssssssssssssssss"
+    "ssssssssssssssssssssssssssss"
+)
+c = "dddddddddd"
 frutas = [
     "pera",
     "maçã",
@@ -16,7 +20,7 @@ frutas = [
     "melão",
     "morango",
     "abacate",
-     "banana",
+    "banana",
     "carambola",
     "pessego",
     "tamara",
@@ -24,12 +28,6 @@ frutas = [
 ]
 
 
-
-
-
-
-
-
-
-carros = ["ferrari", 
-          "brasilia", "gol", up']
+carros = ["ferrari", "brasilia", "gol", "up", "palio", "celta", "fusca", "vectra"]
+for carro in carros:
+    print(carro)
